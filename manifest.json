@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "name": "极简书签",
+  "description": "在浏览器中央显示一个极简书签列表。",
+  "version": "1.0",
+  "action": {
+    "default_title": "极简书签"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+E",
+        "mac": "Command+E"
+      }
+    }
+  },
+  "optional_host_permissions": ["*://*/*"],
+  "permissions": ["bookmarks", "favicon", "activeTab", "scripting"],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "popup.html",
+        "popup.js",
+        "popup.css",
+        "utils/*",
+        "logo.png"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "icons": {
+    "16": "logo.png",
+    "48": "logo.png",
+    "128": "logo.png"
+  }
+}
