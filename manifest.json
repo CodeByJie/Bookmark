@@ -1,13 +1,17 @@
 {
   "manifest_version": 3,
-  "name": "极简书签",
-  "description": "在浏览器中央显示一个极简书签列表。",
-  "version": "1.0",
+  "name": "DuckMark",
+  "description": "一个安静的书签启动器：悬浮面板即时取用，并以书签页替代默认新标签页。",
+  "version": "2.0",
   "action": {
-    "default_title": "极简书签"
+    "default_title": "DuckMark"
   },
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+  "chrome_url_overrides": {
+    "newtab": "newtab.html"
   },
   "commands": {
     "_execute_action": {
@@ -17,18 +21,30 @@
       }
     }
   },
-  "optional_host_permissions": ["*://*/*"],
-  "permissions": ["bookmarks", "favicon", "activeTab", "scripting"],
+  "permissions": ["bookmarks", "favicon", "storage"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content/overlay-injector.js"],
+      "run_at": "document_idle"
+    }
+  ],
   "web_accessible_resources": [
     {
       "resources": [
-        "popup.html",
-        "popup.js",
-        "popup.css",
-        "utils/*",
+        "styles/*.css",
+        "content/*.js",
+        "surface/*.js",
+        "data/*.js",
+        "shared/*.js",
         "logo.png"
       ],
       "matches": ["<all_urls>"]
+    },
+    {
+      "resources": ["_favicon/*"],
+      "matches": ["<all_urls>"],
+      "extension_ids": ["*"]
     }
   ],
   "icons": {

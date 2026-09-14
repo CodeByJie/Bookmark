@@ -1,0 +1,66 @@
+/* ============================================================
+   DuckMark — Overlay System（实底面板，即时显隐）
+   由 content script 按需注入 link（面板打开时）。
+
+   noting-design v4.5：实底 + 边框 + 单阴影，零 backdrop-filter，
+   零开合动画——面板即开即关（无 transition、无弹簧）。
+     · 分离靠色块对比：inset 灰面板 vs 页面，永不错认
+     · 性能最优：纯不透明合成 + 无动画状态
+     · 点阵印在面板底色上（§4 身份保留）
+   卡片（surface 白）浮在面板（bg-inset 灰）上，层级清晰。
+   ============================================================ */
+
+#bookmark-overlay-root {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483646;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overscroll-behavior: contain;
+  opacity: 0;
+  pointer-events: none;
+}
+
+#bookmark-overlay-root.bookmark-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 纱幕：轻度压暗宿主页——模态提示，不承担面板分离 */
+#bookmark-overlay-root .bookmark-backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--dm-scrim);
+}
+
+/* ---- 实底面板：inset 底 + 1px 边框 + 单阴影 ---- */
+#bookmark-overlay-root .bookmark-panel {
+  position: absolute;
+  width: min(900px, calc(100vw - 24px));
+  height: min(700px, calc(85vh - 24px));
+  margin-top: 15vh;
+  border-radius: var(--dm-radius-panel);
+  overflow: hidden;
+  background: var(--dm-bg-inset);
+  border: 1px solid var(--dm-hairline-strong);
+  box-shadow: var(--dm-shadow-lg);
+  /* v4.5：无动画——opacity 由 JS 直接置 0/1，无 transform */
+  opacity: 0;
+}
+
+#bookmark-overlay-root .bookmark-panel * {
+  box-sizing: border-box;
+}
+
+/* surface = 面板内容层：点阵印在 inset 底色上，卡片白色浮起 */
+#bookmark-overlay-root .dm-surface {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: radial-gradient(
+    var(--dm-dot-color-soft) var(--dm-dot-size),
+    transparent var(--dm-dot-size)
+  ) 0 0 / var(--dm-dot-gap) var(--dm-dot-gap);
+  border-radius: var(--dm-radius-panel);
+}

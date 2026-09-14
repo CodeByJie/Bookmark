@@ -1,0 +1,241 @@
+/* ============================================================
+   DuckMark — Surface components (cards, grid, lists)
+   Shared by the overlay panel AND the new-tab page.
+   Token visuals come from tokens.css; this file owns layout.
+
+   noting-design: 单色工业、点阵身份、边框优先、1px hairline、
+   4px 半径、等宽技术数值、紧凑技术标签、静空态、克制动效。
+   ============================================================ */
+
+/* ---- Scroll region (single owner — no nested scroll) ----
+   无 mask：滚动容器上的 mask 每帧重采样，是滚动掉帧的
+   主要来源（v4.6 性能修复）。 */
+.dm-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--dm-space-2) var(--dm-space-3) var(--dm-space-4);
+}
+.dm-list::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+.dm-list {
+  scrollbar-width: none;
+}
+
+/* ---- Section — 工业网格：紧凑技术标签 + mono 计数 ----
+   分组边界只靠间距（v4.5：组间线移除）。
+   content-visibility：视口外的组跳过渲染/布局（v4.6）。 */
+.dm-section {
+  margin: 0 0 var(--dm-space-5);
+  content-visibility: auto;
+  /* 视口外跳过布局时的预估高度（4 列网格的一组约 3 行） */
+  contain-intrinsic-size: auto 172px;
+}
+.dm-section:last-child {
+  margin-bottom: 0;
+}
+.dm-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 28px;
+  margin: 0 0 var(--dm-space-1);
+  padding: 0 var(--dm-space-1);
+}
+.dm-section-title {
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  color: var(--dm-text-tertiary);
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dm-section-count {
+  flex: none;
+  font-family: var(--dm-font-mono);
+  font-size: 11px;
+  line-height: 1;
+  color: var(--dm-text-tertiary);
+  opacity: 0.7;
+}
+
+/* ---- Grid ---- */
+.dm-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--dm-space-1);
+}
+@media (max-width: 560px) {
+  .dm-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ---- Bookmark tile — 工业模块：1px 边框、4px 半径、无阴影 ----
+   v4.6 性能：transition 只声明 background-color（单一 paint 属性）；
+   border-color 不参与过渡——边框变化触发额外 paint，滚动时鼠标
+   扫过几十个卡片会引发 paint 风暴。 */
+.dm-grid > .dm-bookmark {
+  display: flex;
+  align-items: center;
+  gap: var(--dm-space-2);
+  box-sizing: border-box;
+  min-width: 0;
+  height: 40px;
+  padding: 0 var(--dm-space-2);
+  background-color: var(--dm-surface);
+  border: 1px solid var(--dm-hairline);
+  border-radius: var(--dm-radius-card);
+  text-align: left;
+  text-decoration: none;
+  color: var(--dm-text);
+  cursor: pointer;
+  transition: background-color var(--dm-duration) var(--dm-ease);
+}
+/* 按压即时反馈：按下即缩，100ms 快出 */
+.dm-grid > .dm-bookmark:active {
+  transform: scale(0.98);
+  border-color: var(--dm-hairline-strong);
+}
+/* hover 只换背景色（v4.6：去掉 border-color 过渡与变化） */
+.dm-grid > .dm-bookmark:hover {
+  background-color: var(--dm-hover);
+}
+/* 浏览器原生 Tab 焦点环（tiles 是真实 <a> 链接） */
+.dm-grid > .dm-bookmark:focus-visible {
+  outline: 2px solid var(--dm-focus-ring);
+  outline-offset: 2px;
+}
+.dm-grid > .dm-bookmark p {
+  margin: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---- Favicon ---- */
+.dm-favicon {
+  flex: none;
+  display: block;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--dm-radius-favicon);
+  object-fit: contain;
+}
+/* Fallback：单色工业 tile（边框盒 + mono 首字母），不再是彩色块 */
+.dm-favicon-fallback {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--dm-hairline-strong);
+  border-radius: var(--dm-radius-favicon);
+  background: var(--dm-bg-inset);
+  font-family: var(--dm-font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--dm-text-secondary);
+  user-select: none;
+}
+
+/* ---- States — 静技术空态（§19：NO ACTIVITY 式） ---- */
+.dm-empty,
+.dm-error {
+  position: relative;
+  padding: var(--dm-space-12) var(--dm-space-4);
+  font-size: 11px;
+  line-height: 20px;
+  letter-spacing: 0.05em;
+  color: var(--dm-text-tertiary);
+  text-align: center;
+  text-transform: uppercase;
+  /* 点阵空态：Nothing 身份（§4 dot matrix in empty states） */
+  background-image: radial-gradient(var(--dm-dot-color) var(--dm-dot-size), transparent var(--dm-dot-size));
+  background-size: var(--dm-dot-gap) var(--dm-dot-gap);
+}
+
+/* ---- Skeleton — 点阵初始化（§20：INITIALIZING 式） ---- */
+.dm-skeleton {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--dm-space-1);
+}
+.dm-skeleton-card {
+  height: 40px;
+  border: 1px solid var(--dm-hairline);
+  border-radius: var(--dm-radius-card);
+  background:
+    radial-gradient(var(--dm-dot-color) var(--dm-dot-size), transparent var(--dm-dot-size)) 0 0 / var(--dm-dot-gap) var(--dm-dot-gap),
+    var(--dm-skeleton);
+  animation: dm-breathe 1.6s infinite var(--dm-ease);
+}
+@keyframes dm-breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dm-grid > .dm-bookmark,
+  .dm-skeleton-card {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* ---- Theme toggle — 主页右上角（v4.8）----
+   工业图标按钮：1px 边框方块、三态齐全、无色彩。 */
+.dm-theme-toggle {
+  position: absolute;
+  top: var(--dm-space-4);
+  right: var(--dm-space-4);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: var(--dm-surface);
+  border: 1px solid var(--dm-hairline-strong);
+  border-radius: var(--dm-radius-card);
+  color: var(--dm-text-secondary);
+  cursor: pointer;
+  transition: background-color var(--dm-duration) var(--dm-ease);
+}
+.dm-theme-toggle:hover {
+  background: var(--dm-hover);
+  color: var(--dm-text);
+}
+.dm-theme-toggle:active {
+  transform: scale(0.96);
+}
+.dm-theme-toggle:focus-visible {
+  outline: 2px solid var(--dm-focus-ring);
+  outline-offset: 2px;
+}
+.dm-theme-toggle svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+/* 两个图标（太阳/月亮）按当前主题切换显示：
+   黑主题 → 显示太阳（点击切到浅色）；浅主题 → 显示月亮。 */
+.dm-theme-toggle .dm-icon-sun { display: none; }
+.dm-theme-toggle .dm-icon-moon { display: block; }
+html.dm-theme-light .dm-theme-toggle .dm-icon-sun { display: block; }
+html.dm-theme-light .dm-theme-toggle .dm-icon-moon { display: none; }

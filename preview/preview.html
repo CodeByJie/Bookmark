@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DuckMark — 重设计预览</title>
+    <!-- Real, shipped CSS: tokens + surface components -->
+    <link rel="stylesheet" href="../styles/tokens.css" />
+    <link rel="stylesheet" href="../styles/surface.css" />
+    <style>
+      /* Page shell (mirrors what newtab.css does at runtime) */
+      html,
+      body {
+        margin: 0;
+        min-height: 100vh;
+      }
+      body {
+        background-color: var(--dm-bg);
+        /* Nothing 点阵身份（同 newtab.css） */
+        background-image: radial-gradient(var(--dm-dot-color) var(--dm-dot-size), transparent var(--dm-dot-size));
+        background-size: var(--dm-dot-gap) var(--dm-dot-gap);
+        background-attachment: fixed;
+        padding: 48px 32px 64px;
+        box-sizing: border-box;
+      }
+      .dm-wrap {
+        width: min(800px, 100%);
+        margin: 0 auto;
+      }
+      .dm-panel-demo {
+        border: 1px solid var(--dm-hairline-strong);
+        border-radius: var(--dm-radius-panel);
+        /* v4.4 实底面板：inset 底 + 点阵（同 overlay.css） */
+        background: radial-gradient(var(--dm-dot-color-soft) var(--dm-dot-size), transparent var(--dm-dot-size)) 0 0 / var(--dm-dot-gap) var(--dm-dot-gap), var(--dm-bg-inset);
+        box-shadow: var(--dm-shadow-md);
+        overflow: hidden;
+      }
+      .dm-list {
+        max-height: none;
+      }
+      /* v4.7：默认即黑色主调（同 tokens.css 默认值）。
+         切换按钮现在用于预览"浅色降级路径"。 */
+      .dm-light {
+        --dm-bg: #ffffff;
+        --dm-surface: #ffffff;
+        --dm-bg-inset: #f5f5f5;
+        --dm-text: #111111;
+        --dm-text-secondary: #666666;
+        --dm-text-tertiary: #888888;
+        --dm-hover: #f5f5f5;
+        --dm-skeleton: #f5f5f5;
+        --dm-hairline: #e5e5e5;
+        --dm-hairline-strong: #d5d5d5;
+        --dm-dot-color: rgba(17, 17, 17, 0.15);
+        --dm-dot-color-soft: rgba(17, 17, 17, 0.1);
+        --dm-accent: #111111;
+        --dm-focus-ring: #111111;
+      }
+      .dm-toolbar {
+        position: fixed;
+        top: 14px;
+        right: 16px;
+        z-index: 20;
+      }
+      .dm-toolbar button {
+        font: 500 13px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+        color: var(--dm-text);
+        background: var(--dm-surface);
+        border: 1px solid var(--dm-hairline-strong);
+        border-radius: 6px;
+        padding: 8px 14px;
+        cursor: pointer;
+        transition: background 150ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      }
+      .dm-toolbar button:hover {
+        background: var(--dm-hover);
+      }
+      .dm-toolbar button:active {
+        transform: scale(0.98);
+      }
+      .dm-toolbar button:focus-visible {
+        outline: 2px solid var(--dm-focus-ring);
+        outline-offset: 2px;
+      }
+      .dm-note {
+        font-size: 12px;
+        line-height: 20px;
+        color: var(--dm-text-tertiary);
+        padding: 24px 4px 0;
+      }
+      .dm-note code {
+        font-family: ui-monospace, "SF Mono", monospace;
+        font-size: 11px;
+        color: var(--dm-text-secondary);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dm-toolbar">
+      <button onclick="document.documentElement.classList.toggle('dm-light')">
+        切换浅色（默认黑）
+      </button>
+    </div>
+
+    <div class="dm-wrap">
+      <div class="dm-panel-demo">
+        <div class="dm-surface" id="bookmarks">
+          <div class="dm-list">
+            <!-- 设计灵感 -->
+            <section class="dm-section">
+              <div class="dm-section-header">
+                <span class="dm-section-title">设计灵感</span><span class="dm-section-count">6</span>
+              </div>
+              <div class="dm-grid">
+                <a class="dm-bookmark" href="#"><img class="dm-favicon" src="https://www.google.com/s2/favicons?domain=figma.com&sz=64" alt="" /><p>Figma</p></a>
+                <a class="dm-bookmark" href="#"><img class="dm-favicon" src="https://www.google.com/s2/favicons?domain=dribbble.com&sz=64" alt="" /><p>Dribbble</p></a>
+                <a class="dm-bookmark" href="#"><img class="dm-favicon" src="https://www.google.com/s2/favicons?domain=behance.net&sz=64" alt="" /><p>Behance</p></a>
+                <a class="dm-bookmark" href="#"><div class="dm-favicon-fallback">P</div><p>Pinterest</p></a>
+                <a class="dm-bookmark" href="#"><img class="dm-favicon" src="https://www.google.com/s2/favicons?domain=awwwards.com&sz=64" alt="" /><p>Awwwards</p></a>
+                <a class="dm-bookmark" href="#"><div class="dm-favicon-fallback">站</div><p>站酷</p></a>
+              </div>
+            </section>
+
+            <!-- 开发 -->
+            <section class="dm-section">
+              <div class="dm-section-header">
+                <span class="dm-section-title">开发</span><span class="dm-section-count">6</span>
+              </div>
+              <div class="dm-grid">
+                <a class="dm-bookmark" href="#"><img class="dm-favicon" src="https://www.google.com/s2/favicons?domain=developer.mozilla.org&sz=64" alt="" /><p>MDN</p></a>
+                <a class="dm-bookmark" href="#"><img class="dm-favicon" src="https://www.google.com/s2/favicons?domain=stackoverflow.com&sz=64" alt="" /><p>Stack Overflow</p></a>
+                <a class="dm-bookmark" href="#"><div class="dm-favicon-fallback">n</div><p>npm</p></a>
+                <a class="dm-bookmark" href="#"><img class="dm-favicon" src="https://www.google.com/s2/favicons?domain=caniuse.com&sz=64" alt="" /><p>Can I Use</p></a>
+                <a class="dm-bookmark" href="#"><div class="dm-favicon-fallback">C</div><p>CSS-Tricks</p></a>
+                <a class="dm-bookmark" href="#"><div class="dm-favicon-fallback">J</div><p>JavaScript.info</p></a>
+              </div>
+            </section>
+
+            <!-- 阅读 -->
+            <section class="dm-section">
+              <div class="dm-section-header">
+                <span class="dm-section-title">阅读</span><span class="dm-section-count">4</span>
+              </div>
+              <div class="dm-grid">
+                <a class="dm-bookmark" href="#"><div class="dm-favicon-fallback">少</div><p>少数派</p></a>
+                <a class="dm-bookmark" href="#"><div class="dm-favicon-fallback">阮</div><p>阮一峰的网络日志</p></a>
+                <a class="dm-bookmark" href="#"><img class="dm-favicon" src="https://www.google.com/s2/favicons?domain=news.ycombinator.com&sz=64" alt="" /><p>Hacker News</p></a>
+                <a class="dm-bookmark" href="#"><div class="dm-favicon-fallback">NY</div><p>纽约时报</p></a>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+
+      <p class="dm-note">
+        预览使用真实 CSS（<code>styles/tokens.css</code> · <code>styles/surface.css</code>）。
+        v4 重设计（noting-design：Vercel × Geist × Apple × Nothing）：
+        <strong>页面级点阵身份</strong>（20px 网格、1px 点、单色低透明度）、
+        <strong>favicon 回退改单色工业 tile</strong>（边框盒+mono 首字母，替代彩虹色板）、
+        <strong>空态/骨架载入点阵化</strong>、半径收紧（panel 8 / card 4 / favicon 3）、
+        玻璃收敛（blur 12px、高不透明度、无 saturate）。交互三态与 Tab 原生导航保留，
+        面板即时显隐（无动画），CSS 降级（reduced-transparency/contrast）保留。
+      </p>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,159 @@
+/* ============================================================
+   DuckMark — Design Tokens (shared by overlay + new-tab)
+
+   noting-design v4.7：黑色调为主的工业风格（Nothing 式
+   单色近黑）。浅色主题仅保留为系统降级路径；深色近黑为
+   默认视觉。
+
+   Scoped on purpose: variables live on `:root` (for our own
+   extension pages) AND on `#bookmark-overlay-root` (for the
+   injected overlay), so injecting these styles never leaks into
+   or overrides the host page's own html/body. No global
+   html/body rules here.
+   ============================================================ */
+
+:root,
+#bookmark-overlay-root {
+  /* ---- Color — 黑色主调（工业近黑：#0a/#0f/#111 三层） ---- */
+  --dm-bg: #0a0a0a;
+  --dm-bg-grad: #0a0a0a;
+  --dm-surface: #111111;
+  --dm-surface-grad: #111111;
+  --dm-bg-inset: #000000;
+
+  /* 文本三层，仅此三层（白系，按工业层级递减） */
+  --dm-text: #ffffff;
+  --dm-text-secondary: #e5e5e5;
+  --dm-text-tertiary: #999999;
+
+  /* 强调色：白色即强调（黑底上反转）。Accent ≤ 5% 像素。 */
+  --dm-accent: #ffffff;
+  --dm-accent-soft: rgba(255, 255, 255, 0.08);
+  --dm-hover: #1a1a1a;
+  --dm-skeleton: #161616;
+
+  /* Hairline — 边框承担一切结构，阴影退场（工业优先） */
+  --dm-hairline: #262626;
+  --dm-hairline-strong: #303030;
+  --dm-focus-ring: #ffffff;
+
+  /* ---- Dot matrix — Nothing 点阵身份（§4）----
+     16px 网格、1.25px 点、单色。白点低透明度浮在近黑地面上。 */
+  --dm-dot-color: rgba(255, 255, 255, 0.15);
+  --dm-dot-color-soft: rgba(255, 255, 255, 0.10);
+  --dm-dot-size: 1.25px;
+  --dm-dot-gap: 16px;
+
+  /* Elevation — 黑色主调：阴影几乎不可见，层级靠边框与亮度 */
+  --dm-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --dm-shadow-md: 0 4px 8px rgba(0, 0, 0, 0.3), 0 12px 24px rgba(0, 0, 0, 0.4);
+  --dm-shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.3), 0 12px 24px rgba(0, 0, 0, 0.4);
+
+  /* Material — 实底面板：黑色主调下 scrim 加深以保分离 */
+  --dm-glass-panel: #0f0f0f;
+  --dm-glass-panel-border: #303030;
+  --dm-glass-surface: #111111;
+  --dm-scrim: rgba(0, 0, 0, 0.5);
+
+  /* Spacing — 严格的 8px 基 */
+  --dm-space-1: 4px;
+  --dm-space-2: 8px;
+  --dm-space-3: 12px;
+  --dm-space-4: 16px;
+  --dm-space-5: 20px;
+  --dm-space-6: 24px;
+  --dm-space-8: 32px;
+  --dm-space-10: 40px;
+  --dm-space-12: 48px;
+
+  /* Geometry/motion — 工业半径（0 技术件 / 4 紧凑 / 8 大表面） */
+  --dm-radius-card: 4px;
+  --dm-radius-favicon: 3px;
+  --dm-radius-panel: 8px;
+  --dm-duration: 150ms;
+  --dm-duration-exit: 100ms;
+  --dm-ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+  /* Typography — Geist 式系统栈 + 等宽技术字 */
+  --dm-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter",
+    "PingFang SC", "Noto Sans SC", "Helvetica Neue", sans-serif;
+  --dm-font-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Menlo", monospace;
+}
+
+/* Font only applies within our own surfaces (never host page). */
+.dm-surface,
+#bookmark-overlay-root {
+  font-family: var(--dm-font);
+  color: var(--dm-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
+   v4.8 — 主题切换：黑（默认）/ 浅色（.dm-theme-light 类）。
+   类由 data/theme.js 在 html（newtab）与 overlay root 上
+   同步挂摘，storage 事件跨页签实时同步。
+   ============================================================ */
+html.dm-theme-light,
+html.dm-theme-light #bookmark-overlay-root,
+#bookmark-overlay-root.dm-theme-light {
+  --dm-bg: #ffffff;
+  --dm-bg-grad: #ffffff;
+  --dm-surface: #ffffff;
+  --dm-surface-grad: #ffffff;
+  --dm-bg-inset: #f5f5f5;
+
+  --dm-text: #111111;
+  --dm-text-secondary: #666666;
+  --dm-text-tertiary: #888888;
+
+  --dm-accent: #111111;
+  --dm-accent-soft: rgba(17, 17, 17, 0.06);
+  --dm-hover: #f5f5f5;
+  --dm-skeleton: #f5f5f5;
+
+  --dm-hairline: #e5e5e5;
+  --dm-hairline-strong: #d5d5d5;
+  --dm-focus-ring: #111111;
+
+  --dm-dot-color: rgba(17, 17, 17, 0.15);
+  --dm-dot-color-soft: rgba(17, 17, 17, 0.10);
+
+  --dm-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --dm-shadow-md: 0 4px 8px rgba(0, 0, 0, 0.04), 0 12px 24px rgba(0, 0, 0, 0.06);
+  --dm-shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.04), 0 12px 24px rgba(0, 0, 0, 0.06);
+
+  --dm-glass-panel: #ffffff;
+  --dm-glass-panel-border: #d5d5d5;
+  --dm-glass-surface: #ffffff;
+  --dm-scrim: rgba(0, 0, 0, 0.2);
+}
+
+/* ============================================================
+   Reduced transparency — 实底面板无玻璃可降级；
+   仅收紧 scrim（可读性优先）。
+   ============================================================ */
+@media (prefers-reduced-transparency: reduce) {
+  :root,
+  #bookmark-overlay-root {
+    --dm-scrim: rgba(0, 0, 0, 0.4);
+  }
+}
+
+/* ============================================================
+   High contrast — 加深边框与文本对比（黑底上提亮边框）
+   ============================================================ */
+@media (prefers-contrast: high) {
+  :root,
+  #bookmark-overlay-root {
+    --dm-text-secondary: #ffffff;
+    --dm-text-tertiary: #cccccc;
+    --dm-hairline: rgba(255, 255, 255, 0.45);
+    --dm-hairline-strong: rgba(255, 255, 255, 0.65);
+    --dm-hover: #1f1f1f;
+    --dm-shadow-sm: none;
+    --dm-shadow-md: none;
+    --dm-shadow-lg: none;
+  }
+}
