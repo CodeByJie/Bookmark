@@ -44,6 +44,7 @@
  * @property {"dm-open"} action
  * @property {string} url
  * @property {boolean} newTab           true=新标签 / false=当前标签
+ * @property {boolean} [background]     true=后台新标签（中键）
  *
  * @typedef {Object} BookmarksChangedMessage  书签变更广播（仅失效，
  * @property {"dm-bookmarks-changed"} action  不触发模块加载）

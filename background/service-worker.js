@@ -53,7 +53,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
   if (msg.action !== MSG.OPEN_BOOKMARK) return;
   const tabId = sender.tab?.id;
-  if (msg.newTab) {
+  if (msg.background) {
+    chrome.tabs.create({ url: msg.url, active: false });
+  } else if (msg.newTab) {
     chrome.tabs.create({ url: msg.url });
   } else if (tabId != null) {
     chrome.tabs.update(tabId, { url: msg.url });

@@ -131,8 +131,8 @@ function toggle() {
   else open();
 }
 
-function openBookmark(url, newTab) {
-  chrome.runtime.sendMessage({ action: MSG.OPEN_BOOKMARK, url, newTab });
+function openBookmark(url, newTab, background = false) {
+  chrome.runtime.sendMessage({ action: MSG.OPEN_BOOKMARK, url, newTab, background });
 }
 
 function refresh() {

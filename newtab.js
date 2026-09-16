@@ -1,7 +1,7 @@
 // ============================================================
 // newtab.js — the new-tab page reuses the SAME surface module as
 // the overlay (inline mode). Plain click navigates the tab;
-// ⌘/Ctrl+click opens a new tab.
+// ⌘/Ctrl+click opens a new tab; middle-click opens a background tab.
 //
 // v4.8：右上角主题切换按钮（.dm-theme-toggle）——偏好写入
 // chrome.storage.local，storage.onChanged 事件让所有打开的
@@ -14,9 +14,9 @@ import { getTheme, setTheme, applyThemeClass, onThemeChange } from "./data/theme
 const container = document.getElementById("bookmarks");
 const themeToggle = document.getElementById("theme-toggle");
 
-function openBookmark(url, newTab) {
+function openBookmark(url, newTab, background = false) {
   if (newTab) {
-    chrome.tabs.create({ url });
+    chrome.tabs.create({ url, active: !background });
   } else {
     chrome.tabs.update({ url });
   }

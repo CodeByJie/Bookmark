@@ -5,7 +5,7 @@
 //
 // The grid itself is the interface — mouse-driven:
 //   • click opens (⌘/Ctrl = same-tab override)
-//   • middle-click opens in a new tab
+//   • middle-click opens in a background tab
 //   • tiles are real <a> links — browser-native Tab navigation
 //     and focus rings come for free
 // Holds the model so re-renders are cheap, never re-fetches.
@@ -128,11 +128,11 @@ export function createBookmarkList(container, opts = {}) {
     opts.onOpen?.({ url: a.dataset.url, id: a.dataset.id }, e);
   });
   container.addEventListener("auxclick", (e) => {
-    if (e.button !== 1) return; // middle-click → new tab
+    if (e.button !== 1) return; // middle-click → background tab
     const a = e.target.closest(".dm-bookmark");
     if (!a) return;
     e.preventDefault();
-    opts.onOpen?.({ url: a.dataset.url, id: a.dataset.id }, { metaKey: true, ctrlKey: true });
+    opts.onOpen?.({ url: a.dataset.url, id: a.dataset.id }, { button: 1 });
   });
 
   return {

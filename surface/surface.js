@@ -21,7 +21,7 @@ import { getTree, watch, onChanged } from "../data/bookmarks-cache.js";
 /**
  * @typedef {Object} SurfaceOptions
  * @property {"overlay"|"inline"} mode
- * @property {(url: string, newTab: boolean) => void} openBookmark
+ * @property {(url: string, newTab: boolean, background: boolean) => void} openBookmark
  * @property {(() => void)|null} [onClose]   overlay 打开书签后收起面板
  *
  * @typedef {Object} SurfaceHandle
@@ -40,10 +40,16 @@ export function mountSurface(content, opts) {
   let destroyed = false;
 
   function handleOpen(item, event) {
-    const newTab =
-      event && (event.metaKey || event.ctrlKey) ? !defaultNewTab : defaultNewTab;
-    opts.openBookmark(item.url, newTab);
-    if (opts.mode === "overlay") opts.onClose?.();
+    // 中键：一律后台新页签（两种模式一致）
+    const background = Boolean(event && event.button === 1);
+    const newTab = background
+      ? true
+      : event && (event.metaKey || event.ctrlKey)
+        ? !defaultNewTab
+        : defaultNewTab;
+    opts.openBookmark(item.url, newTab, background);
+    // 后台打开不收起面板，便于连续中键开多个书签
+    if (opts.mode === "overlay" && !background) opts.onClose?.();
   }
 
   const listEl = document.createElement("div");
