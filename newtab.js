@@ -3,7 +3,7 @@
 // the overlay (inline mode). Plain click navigates the tab;
 // ⌘/Ctrl+click opens a new tab; middle-click opens a background tab.
 //
-// v4.8：右上角主题切换按钮（.dm-theme-toggle）——偏好写入
+// 右上角主题切换按钮（.dm-theme-toggle）——偏好写入
 // chrome.storage.local，storage.onChanged 事件让所有打开的
 // newtab 页签与浮板面板实时同步。
 // ============================================================
@@ -23,7 +23,7 @@ function openBookmark(url, newTab, background = false) {
 }
 
 // ---- 主题：初始应用 + 按钮切换 + 跨页签同步 ----
-let currentTheme = "dark";
+let currentTheme = "light";
 
 async function initTheme() {
   currentTheme = await getTheme();

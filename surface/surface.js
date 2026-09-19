@@ -4,12 +4,10 @@
 // 同一个"书签网格"内核，挂载进两种外壳：
 //   mode:"overlay" → 悬浮面板
 //   mode:"inline"  → 新标签页
-// 两种模式渲染完全一致：书签文件夹分区，无特殊区
-// （v4.9：常用/frecency 区已删除）。
+// 两种模式渲染完全一致：书签文件夹分区，无特殊区。
 //
 // 接口契约（SurfaceHandle）：
 //   load()      拉取/刷新数据并重渲染（幂等，可反复调用）
-//   destroy()   退订书签变更、解除 watch（生命周期闭环）
 //
 // 数据流向（单向）：data/bookmarks-cache → sections → BookmarkList
 // 打开行为（唯一出口）：handleOpen 计算 newTab 后回调 opts.openBookmark
@@ -26,7 +24,6 @@ import { getTree, watch, onChanged } from "../data/bookmarks-cache.js";
  *
  * @typedef {Object} SurfaceHandle
  * @property {() => Promise<void>} load
- * @property {() => void} destroy
  */
 
 /**
@@ -37,7 +34,6 @@ import { getTree, watch, onChanged } from "../data/bookmarks-cache.js";
 export function mountSurface(content, opts) {
   const defaultNewTab = opts.mode === "overlay";
   let watching = false;
-  let destroyed = false;
 
   function handleOpen(item, event) {
     // 中键：一律后台新页签（两种模式一致）
@@ -58,7 +54,6 @@ export function mountSurface(content, opts) {
   content.appendChild(listEl);
 
   async function load() {
-    if (destroyed) return;
     if (!watching) {
       watch();
       watching = true;
@@ -75,15 +70,9 @@ export function mountSurface(content, opts) {
   }
 
   // 订阅一次（在 load 之外），重复打开不会叠加监听。
-  const unsubscribe = onChanged(() => {
-    if (!destroyed && content.isConnected) load();
+  onChanged(() => {
+    if (content.isConnected) load();
   });
 
-  return {
-    load,
-    destroy() {
-      destroyed = true;
-      unsubscribe();
-    },
-  };
+  return { load };
 }

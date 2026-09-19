@@ -1,7 +1,6 @@
 // ============================================================
 // surface/BookmarkList.js
-// Pure rendering of bookmark sections (folders only, v4.9：
-// 常用/frecency 区已删除)。
+// Pure rendering of bookmark sections (folders only).
 //
 // The grid itself is the interface — mouse-driven:
 //   • click opens (⌘/Ctrl = same-tab override)
@@ -43,14 +42,13 @@ export function collectFolders(nodes) {
 }
 
 export function createBookmarkList(container, opts = {}) {
-  let sections = []; // [{ title, bookmarks:[{id,title,url}] }]
+  let sections = []; // [{ title, bookmarks:[{title,url}] }]
 
   function setData(tree) {
     const built = [];
     for (const folder of collectFolders(tree?.children || [])) {
       // collectFolders 只收"含书签"的文件夹，bookmarks 必非空
       const bookmarks = (folder.children || []).filter(isBookmark).map((n) => ({
-        id: n.id,
         title: n.title || titleFromUrl(n.url),
         url: n.url,
       }));
@@ -108,7 +106,6 @@ export function createBookmarkList(container, opts = {}) {
     a.className = "dm-bookmark";
     a.href = b.url;
     a.dataset.url = b.url;
-    a.dataset.id = b.id || "";
     a.rel = "noopener noreferrer";
     a.setAttribute("aria-label", b.title);
 
@@ -125,14 +122,14 @@ export function createBookmarkList(container, opts = {}) {
     const a = e.target.closest(".dm-bookmark");
     if (!a) return;
     e.preventDefault();
-    opts.onOpen?.({ url: a.dataset.url, id: a.dataset.id }, e);
+    opts.onOpen?.({ url: a.dataset.url }, e);
   });
   container.addEventListener("auxclick", (e) => {
     if (e.button !== 1) return; // middle-click → background tab
     const a = e.target.closest(".dm-bookmark");
     if (!a) return;
     e.preventDefault();
-    opts.onOpen?.({ url: a.dataset.url, id: a.dataset.id }, { button: 1 });
+    opts.onOpen?.({ url: a.dataset.url }, { button: 1 });
   });
 
   return {

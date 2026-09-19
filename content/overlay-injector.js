@@ -15,7 +15,7 @@
 
   // ⚠ 协议常量的镜像——本文件是 classic script，无法 import
   // shared/protocol.js（ESM）。改动 protocol.js 时必须同步这里。
-  const TOGGLE_ACTIONS = new Set(["dm-toggle", "dm-open-panel", "dm-close-panel"]);
+  const TOGGLE_ACTIONS = new Set(["dm-toggle"]);
   // Invalidation-only actions: they must NOT trigger a module load.
   // The SW broadcasts these to *every* tab on any bookmark edit, so
   // treating them like a toggle would pull the whole module graph

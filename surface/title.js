@@ -1,11 +1,9 @@
 // ============================================================
 // surface/title.js — 书签标题回退（单一实现）
 //
-// v2.1 里 surface.js 与 BookmarkList.js 各抄了一份"无标题时从
-// URL 推导"的逻辑，已合并到这里。规则：
-//   chrome:// 类 → 取 host 段；否则取域名单词首字母大写（去掉
-//   www.）；实在没救 → URL 前 30 字符。调用方（BookmarkList）
-//   先查 node.title，空才回落本函数。
+// 规则：chrome:// 类 → 取 host 段；否则取域名单词首字母大写
+// （去掉 www.）；实在没救 → URL 前 30 字符。调用方（BookmarkList）
+// 先查 node.title，空才回落本函数。
 // ============================================================
 
 export function titleFromUrl(url) {

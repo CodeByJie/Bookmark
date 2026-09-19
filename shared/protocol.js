@@ -25,12 +25,6 @@
  * @typedef {Object} ToggleMessage      ⌘E / 工具栏按钮 → 切换面板
  * @property {"dm-toggle"} action
  *
- * @typedef {Object} OpenPanelMessage   显式打开
- * @property {"dm-open-panel"} action
- *
- * @typedef {Object} ClosePanelMessage  显式关闭
- * @property {"dm-close-panel"} action
- *
  * @typedef {Object} GetTreeMessage     content script 无 chrome.bookmarks，
  *                                      向 SW 代理请求书签树
  * @property {"dm-get-tree"} action
@@ -52,19 +46,13 @@
 
 export const MSG = Object.freeze({
   TOGGLE: "dm-toggle",
-  OPEN_PANEL: "dm-open-panel",
-  CLOSE_PANEL: "dm-close-panel",
   GET_TREE: "dm-get-tree",
   OPEN_BOOKMARK: "dm-open",
   BOOKMARKS_CHANGED: "dm-bookmarks-changed",
 });
 
 /** 会触发 overlay 模块懒加载的动作（injector 侧镜像此集合）。 */
-export const TOGGLE_ACTIONS = Object.freeze([
-  MSG.TOGGLE,
-  MSG.OPEN_PANEL,
-  MSG.CLOSE_PANEL,
-]);
+export const TOGGLE_ACTIONS = Object.freeze([MSG.TOGGLE]);
 
 /** 仅失效缓存的动作——绝不触发模块加载（injector 侧镜像此集合）。 */
 export const INVALIDATE_ACTIONS = Object.freeze([MSG.BOOKMARKS_CHANGED]);

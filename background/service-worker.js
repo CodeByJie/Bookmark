@@ -12,21 +12,12 @@
 
 import { MSG } from "../shared/protocol.js";
 
-const SKIP_PROTOCOLS = [
-  "chrome:",
-  "chrome-extension:",
-  "edge:",
-  "about:",
-  "devtools:",
-  "view-source:",
-];
-
 chrome.action.onClicked.addListener(async (tab) => {
   if (!tab?.id) return;
   // `tab.url` 只在申请了 tabs/activeTab 权限时才有值——我们都没申请，
-  // 所以协议检查只是 best-effort；浏览器页没有 content script，
-  // sendMessage 会 reject 并被下方 catch 吞掉，天然覆盖 chrome:// 等。
-  if (tab.url && SKIP_PROTOCOLS.some((p) => tab.url.startsWith(p))) return;
+  // 所以这里只是 best-effort 过滤；浏览器页没有 content script，
+  // sendMessage 会 reject 并被下方 catch 吞掉，天然兜底。
+  if (tab.url && !tab.url.startsWith("http")) return;
   try {
     await chrome.tabs.sendMessage(tab.id, { action: MSG.TOGGLE });
   } catch {

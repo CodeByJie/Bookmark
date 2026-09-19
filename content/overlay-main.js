@@ -5,8 +5,7 @@
 //
 //   idle ──open()──► building ──build 完成──► ready
 //                      │                        │
-//                      └──失败──► idle          ├──open/close/toggle
-//                                                └──destroy──► idle
+//                      └──失败──► idle          └──open/close/toggle
 //
 // 对外接口（injector 唯一触点）：
 //   handleMessage(msg) — 按 shared/protocol.js 的契约分发
@@ -35,7 +34,6 @@ let buildPromise = null;
 let root = null;
 let surface = null;
 let panel = null;
-let unwatchTheme = null;
 
 function cssId(file) {
   return CSS_ID_PREFIX + file.replace(/[^a-z0-9]/gi, "");
@@ -92,7 +90,7 @@ async function build() {
     // 主题：构建时应用当前偏好，之后 storage 事件实时同步
     // （newtab 页签里切的浅色，这里跟着变）。
     applyThemeClass(root, await getTheme());
-    unwatchTheme = onThemeChange((theme) => applyThemeClass(root, theme));
+    onThemeChange((theme) => applyThemeClass(root, theme));
 
     phase = "ready";
   })();
@@ -149,12 +147,6 @@ export function handleMessage(msg) {
   switch (msg.action) {
     case MSG.TOGGLE:
       toggle();
-      break;
-    case MSG.OPEN_PANEL:
-      open();
-      break;
-    case MSG.CLOSE_PANEL:
-      close();
       break;
     case MSG.BOOKMARKS_CHANGED:
       refresh();
