@@ -42,13 +42,16 @@ export function collectFolders(nodes) {
 }
 
 export function createBookmarkList(container, opts = {}) {
-  let sections = []; // [{ title, bookmarks:[{title,url}] }]
+  // opts.onRemove 存在 = 本实例可编辑（仅 newtab），tile 渲染 × 钮；
+  // 悬浮面板不传，结构上不可能出现编辑 UI。
+  let sections = []; // [{ title, bookmarks:[{id,title,url}] }]
 
   function setData(tree) {
     const built = [];
     for (const folder of collectFolders(tree?.children || [])) {
       // collectFolders 只收"含书签"的文件夹，bookmarks 必非空
       const bookmarks = (folder.children || []).filter(isBookmark).map((n) => ({
+        id: n.id, // dataset.id 是删除操作的主键——勿当死代码清理
         title: n.title || titleFromUrl(n.url),
         url: n.url,
       }));
@@ -106,6 +109,7 @@ export function createBookmarkList(container, opts = {}) {
     a.className = "dm-bookmark";
     a.href = b.url;
     a.dataset.url = b.url;
+    a.dataset.id = b.id || "";
     a.rel = "noopener noreferrer";
     a.setAttribute("aria-label", b.title);
 
@@ -114,22 +118,44 @@ export function createBookmarkList(container, opts = {}) {
     const p = document.createElement("p");
     p.textContent = b.title;
     a.appendChild(p);
+
+    if (opts.onRemove) {
+      const del = document.createElement("button");
+      del.type = "button";
+      del.tabIndex = -1;
+      del.className = "dm-bookmark-delete";
+      del.setAttribute("aria-label", `删除书签 ${b.title}`);
+      del.textContent = "×";
+      a.appendChild(del);
+    }
     return a;
   }
 
   // ---- Mouse ----
+  // 编辑态判定在 surface 层（handleOpen 屏蔽打开）；这里只负责
+  // 识别 × 钮——分支必须前置并 return，同容器同监听上
+  // stopPropagation 挡不住自家后续逻辑。
   container.addEventListener("click", (e) => {
+    const del = e.target.closest(".dm-bookmark-delete");
+    if (del) {
+      e.preventDefault();
+      e.stopPropagation();
+      const tile = del.closest(".dm-bookmark");
+      opts.onRemove?.(tile.dataset.id, tile.dataset.url);
+      return;
+    }
     const a = e.target.closest(".dm-bookmark");
     if (!a) return;
     e.preventDefault();
-    opts.onOpen?.({ url: a.dataset.url }, e);
+    opts.onOpen?.({ url: a.dataset.url, id: a.dataset.id }, e);
   });
   container.addEventListener("auxclick", (e) => {
     if (e.button !== 1) return; // middle-click → background tab
     const a = e.target.closest(".dm-bookmark");
     if (!a) return;
     e.preventDefault();
-    opts.onOpen?.({ url: a.dataset.url }, { button: 1 });
+    if (e.target.closest(".dm-bookmark-delete")) return; // 编辑态只删不开
+    opts.onOpen?.({ url: a.dataset.url, id: a.dataset.id }, { button: 1 });
   });
 
   return {

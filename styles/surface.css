@@ -82,6 +82,7 @@
    border-color 不参与过渡——边框变化触发额外 paint，滚动时鼠标
    扫过几十个卡片会引发 paint 风暴。 */
 .dm-grid > .dm-bookmark {
+  position: relative; /* × 删除钮的定位锚点 */
   display: flex;
   align-items: center;
   gap: var(--dm-space-2);
@@ -197,12 +198,11 @@
   }
 }
 
-/* ---- Theme toggle — 主页右上角（v4.8）----
+/* ---- 右上角图标按钮组 — 主页右上（主题 / 整理）----
    工业图标按钮：1px 边框方块、三态齐全、无色彩。 */
-.dm-theme-toggle {
+.dm-icon-btn {
   position: absolute;
   top: var(--dm-space-4);
-  right: var(--dm-space-4);
   z-index: 10;
   display: flex;
   align-items: center;
@@ -217,21 +217,37 @@
   cursor: pointer;
   transition: background-color var(--dm-duration) var(--dm-ease);
 }
-.dm-theme-toggle:hover {
+.dm-icon-btn:hover {
   background: var(--dm-hover);
   color: var(--dm-text);
 }
-.dm-theme-toggle:active {
+.dm-icon-btn:active {
   transform: scale(0.96);
 }
-.dm-theme-toggle:focus-visible {
+.dm-icon-btn:focus-visible {
   outline: 2px solid var(--dm-focus-ring);
   outline-offset: 2px;
 }
-.dm-theme-toggle svg {
+.dm-icon-btn svg {
   width: 16px;
   height: 16px;
   display: block;
+}
+.dm-theme-toggle {
+  right: calc(var(--dm-space-4) + 32px + var(--dm-space-2));
+}
+.dm-edit-toggle {
+  right: var(--dm-space-4);
+}
+/* 开关型按钮的"开"态：反色（token 随主题翻转，两主题恒可读） */
+.dm-edit-toggle[aria-pressed="true"] {
+  background: var(--dm-accent);
+  border-color: var(--dm-accent);
+  color: var(--dm-bg);
+}
+.dm-edit-toggle[aria-pressed="true"]:hover {
+  background: var(--dm-accent);
+  color: var(--dm-bg);
 }
 /* 两个图标（太阳/月亮）按当前主题切换显示：
    浅主题（默认）→ 显示月亮（点击切到黑）；黑主题 → 显示太阳。 */
@@ -239,3 +255,92 @@
 .dm-theme-toggle .dm-icon-moon { display: none; }
 html.dm-theme-dark .dm-theme-toggle .dm-icon-sun { display: none; }
 html.dm-theme-dark .dm-theme-toggle .dm-icon-moon { display: block; }
+
+/* ---- 删除模式（仅 newtab；overlay 不传 onRemove，永不出现）----
+   × 钮只在 tile 渲染（可编辑实例）且 .dm-editing 时显示。
+   不用 pointer-events:none 屏蔽 tile——会连带吃掉子级 × 的点击。 */
+.dm-bookmark-delete {
+  display: none;
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  bottom: 2px;
+  margin: auto 0; /* 40px tile 内垂直居中 */
+  z-index: 1;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--dm-font-mono);
+  font-size: 13px;
+  line-height: 1;
+  background: var(--dm-surface);
+  border: 1px solid var(--dm-hairline-strong);
+  border-radius: var(--dm-radius-card);
+  color: var(--dm-text-secondary);
+  cursor: pointer;
+}
+.dm-editing .dm-bookmark-delete {
+  display: flex;
+}
+.dm-bookmark-delete:hover {
+  background: var(--dm-accent);
+  border-color: var(--dm-accent);
+  color: var(--dm-bg);
+}
+.dm-editing .dm-grid > .dm-bookmark {
+  padding-right: 24px; /* 标题让位于角上的 × 钮 */
+  cursor: default;
+}
+.dm-editing .dm-grid > .dm-bookmark:active {
+  transform: none;
+}
+
+/* ---- Undo toast — body 级单例，底部居中 ---- */
+.dm-toast {
+  position: fixed;
+  left: 50%;
+  bottom: var(--dm-space-8);
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: var(--dm-space-3);
+  max-width: min(480px, calc(100vw - 24px));
+  height: 40px;
+  padding: 0 var(--dm-space-2) 0 var(--dm-space-4);
+  background: var(--dm-surface);
+  border: 1px solid var(--dm-hairline-strong);
+  border-radius: var(--dm-radius-panel);
+  box-shadow: var(--dm-shadow-md);
+}
+.dm-toast-text {
+  min-width: 0;
+  font-size: 13px;
+  color: var(--dm-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dm-toast-action {
+  flex: none;
+  height: 26px;
+  padding: 0 var(--dm-space-3);
+  background: transparent;
+  border: 1px solid var(--dm-hairline-strong);
+  border-radius: var(--dm-radius-card);
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--dm-text);
+  cursor: pointer;
+}
+.dm-toast-action:hover {
+  background: var(--dm-accent);
+  border-color: var(--dm-accent);
+  color: var(--dm-bg);
+}
+.dm-toast-action:focus-visible {
+  outline: 2px solid var(--dm-focus-ring);
+  outline-offset: 2px;
+}
