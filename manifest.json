@@ -35,6 +35,7 @@
         "styles/*.css",
         "content/*.js",
         "surface/*.js",
+        "data/*.js",
         "shared/*.js",
         "logo.png"
       ],
