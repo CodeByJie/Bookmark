@@ -234,8 +234,8 @@
   display: block;
 }
 /* 两个图标（太阳/月亮）按当前主题切换显示：
-   黑主题 → 显示太阳（点击切到浅色）；浅主题 → 显示月亮。 */
-.dm-theme-toggle .dm-icon-sun { display: none; }
-.dm-theme-toggle .dm-icon-moon { display: block; }
-html.dm-theme-light .dm-theme-toggle .dm-icon-sun { display: block; }
-html.dm-theme-light .dm-theme-toggle .dm-icon-moon { display: none; }
+   浅主题（默认）→ 显示月亮（点击切到黑）；黑主题 → 显示太阳。 */
+.dm-theme-toggle .dm-icon-sun { display: block; }
+.dm-theme-toggle .dm-icon-moon { display: none; }
+html.dm-theme-dark .dm-theme-toggle .dm-icon-sun { display: none; }
+html.dm-theme-dark .dm-theme-toggle .dm-icon-moon { display: block; }

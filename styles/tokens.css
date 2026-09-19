@@ -1,9 +1,8 @@
 /* ============================================================
    DuckMark — Design Tokens (shared by overlay + new-tab)
 
-   noting-design v4.7：黑色调为主的工业风格（Nothing 式
-   单色近黑）。浅色主题仅保留为系统降级路径；深色近黑为
-   默认视觉。
+   两套完整色板：基色板 = 浅色（默认，无需任何 JS 参与，
+   首次绘制即正确）；黑色为 .dm-theme-dark 覆盖类。
 
    Scoped on purpose: variables live on `:root` (for our own
    extension pages) AND on `#bookmark-overlay-root` (for the
@@ -14,46 +13,45 @@
 
 :root,
 #bookmark-overlay-root {
-  /* ---- Color — 黑色主调（工业近黑：#0a/#0f/#111 三层） ---- */
-  --dm-bg: #0a0a0a;
-  --dm-bg-grad: #0a0a0a;
-  --dm-surface: #111111;
-  --dm-surface-grad: #111111;
-  --dm-bg-inset: #000000;
+  /* ---- Color — 浅色主板（克制：白面 + 近黑文本） ---- */
+  --dm-bg: #ffffff;
+  --dm-bg-grad: #ffffff;
+  --dm-surface: #ffffff;
+  --dm-surface-grad: #ffffff;
+  --dm-bg-inset: #f5f5f5;
 
-  /* 文本三层，仅此三层（白系，按工业层级递减） */
-  --dm-text: #ffffff;
-  --dm-text-secondary: #e5e5e5;
-  --dm-text-tertiary: #999999;
+  --dm-text: #111111;
+  --dm-text-secondary: #666666;
+  --dm-text-tertiary: #888888;
 
-  /* 强调色：白色即强调（黑底上反转）。Accent ≤ 5% 像素。 */
-  --dm-accent: #ffffff;
-  --dm-accent-soft: rgba(255, 255, 255, 0.08);
-  --dm-hover: #1a1a1a;
-  --dm-skeleton: #161616;
+  /* 强调色：近黑即强调（白底上反转）。Accent ≤ 5% 像素。 */
+  --dm-accent: #111111;
+  --dm-accent-soft: rgba(17, 17, 17, 0.06);
+  --dm-hover: #f5f5f5;
+  --dm-skeleton: #f5f5f5;
 
   /* Hairline — 边框承担一切结构，阴影退场（工业优先） */
-  --dm-hairline: #262626;
-  --dm-hairline-strong: #303030;
-  --dm-focus-ring: #ffffff;
+  --dm-hairline: #e5e5e5;
+  --dm-hairline-strong: #d5d5d5;
+  --dm-focus-ring: #111111;
 
   /* ---- Dot matrix — Nothing 点阵身份（§4）----
-     16px 网格、1.25px 点、单色。白点低透明度浮在近黑地面上。 */
-  --dm-dot-color: rgba(255, 255, 255, 0.15);
-  --dm-dot-color-soft: rgba(255, 255, 255, 0.10);
+     16px 网格、1.25px 点、单色。 */
+  --dm-dot-color: rgba(17, 17, 17, 0.15);
+  --dm-dot-color-soft: rgba(17, 17, 17, 0.10);
   --dm-dot-size: 1.25px;
   --dm-dot-gap: 16px;
 
-  /* Elevation — 黑色主调：阴影几乎不可见，层级靠边框与亮度 */
-  --dm-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --dm-shadow-md: 0 4px 8px rgba(0, 0, 0, 0.3), 0 12px 24px rgba(0, 0, 0, 0.4);
-  --dm-shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.3), 0 12px 24px rgba(0, 0, 0, 0.4);
+  /* Elevation — 浅色下阴影收紧，层级靠边框与亮度 */
+  --dm-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --dm-shadow-md: 0 4px 8px rgba(0, 0, 0, 0.04), 0 12px 24px rgba(0, 0, 0, 0.06);
+  --dm-shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.04), 0 12px 24px rgba(0, 0, 0, 0.06);
 
-  /* Material — 实底面板：黑色主调下 scrim 加深以保分离 */
-  --dm-glass-panel: #0f0f0f;
-  --dm-glass-panel-border: #303030;
-  --dm-glass-surface: #111111;
-  --dm-scrim: rgba(0, 0, 0, 0.5);
+  /* Material — 实底面板 */
+  --dm-glass-panel: #ffffff;
+  --dm-glass-panel-border: #d5d5d5;
+  --dm-glass-surface: #ffffff;
+  --dm-scrim: rgba(0, 0, 0, 0.2);
 
   /* Spacing — 严格的 8px 基 */
   --dm-space-1: 4px;
@@ -91,43 +89,43 @@
 }
 
 /* ============================================================
-   v4.8 — 主题切换：黑（默认）/ 浅色（.dm-theme-light 类）。
+   主题切换：基色板为浅色（默认）；黑色由 .dm-theme-dark 类覆盖。
    类由 data/theme.js 在 html（newtab）与 overlay root 上
    同步挂摘，storage 事件跨页签实时同步。
    ============================================================ */
-html.dm-theme-light,
-html.dm-theme-light #bookmark-overlay-root,
-#bookmark-overlay-root.dm-theme-light {
-  --dm-bg: #ffffff;
-  --dm-bg-grad: #ffffff;
-  --dm-surface: #ffffff;
-  --dm-surface-grad: #ffffff;
-  --dm-bg-inset: #f5f5f5;
+html.dm-theme-dark,
+html.dm-theme-dark #bookmark-overlay-root,
+#bookmark-overlay-root.dm-theme-dark {
+  --dm-bg: #0a0a0a;
+  --dm-bg-grad: #0a0a0a;
+  --dm-surface: #111111;
+  --dm-surface-grad: #111111;
+  --dm-bg-inset: #000000;
 
-  --dm-text: #111111;
-  --dm-text-secondary: #666666;
-  --dm-text-tertiary: #888888;
+  --dm-text: #ffffff;
+  --dm-text-secondary: #e5e5e5;
+  --dm-text-tertiary: #999999;
 
-  --dm-accent: #111111;
-  --dm-accent-soft: rgba(17, 17, 17, 0.06);
-  --dm-hover: #f5f5f5;
-  --dm-skeleton: #f5f5f5;
+  --dm-accent: #ffffff;
+  --dm-accent-soft: rgba(255, 255, 255, 0.08);
+  --dm-hover: #1a1a1a;
+  --dm-skeleton: #161616;
 
-  --dm-hairline: #e5e5e5;
-  --dm-hairline-strong: #d5d5d5;
-  --dm-focus-ring: #111111;
+  --dm-hairline: #262626;
+  --dm-hairline-strong: #303030;
+  --dm-focus-ring: #ffffff;
 
-  --dm-dot-color: rgba(17, 17, 17, 0.15);
-  --dm-dot-color-soft: rgba(17, 17, 17, 0.10);
+  --dm-dot-color: rgba(255, 255, 255, 0.15);
+  --dm-dot-color-soft: rgba(255, 255, 255, 0.10);
 
-  --dm-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --dm-shadow-md: 0 4px 8px rgba(0, 0, 0, 0.04), 0 12px 24px rgba(0, 0, 0, 0.06);
-  --dm-shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.04), 0 12px 24px rgba(0, 0, 0, 0.06);
+  --dm-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --dm-shadow-md: 0 4px 8px rgba(0, 0, 0, 0.3), 0 12px 24px rgba(0, 0, 0, 0.4);
+  --dm-shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.3), 0 12px 24px rgba(0, 0, 0, 0.4);
 
-  --dm-glass-panel: #ffffff;
-  --dm-glass-panel-border: #d5d5d5;
-  --dm-glass-surface: #ffffff;
-  --dm-scrim: rgba(0, 0, 0, 0.2);
+  --dm-glass-panel: #0f0f0f;
+  --dm-glass-panel-border: #303030;
+  --dm-glass-surface: #111111;
+  --dm-scrim: rgba(0, 0, 0, 0.5);
 }
 
 /* ============================================================
@@ -142,18 +140,26 @@ html.dm-theme-light #bookmark-overlay-root,
 }
 
 /* ============================================================
-   High contrast — 加深边框与文本对比（黑底上提亮边框）
+   High contrast — 加深边框与文本对比（按各自底色提亮/压深）
    ============================================================ */
 @media (prefers-contrast: high) {
   :root,
   #bookmark-overlay-root {
+    --dm-text-secondary: #000000;
+    --dm-text-tertiary: #444444;
+    --dm-hairline: rgba(0, 0, 0, 0.45);
+    --dm-hairline-strong: rgba(0, 0, 0, 0.65);
+    --dm-shadow-sm: none;
+    --dm-shadow-md: none;
+    --dm-shadow-lg: none;
+  }
+
+  html.dm-theme-dark,
+  #bookmark-overlay-root.dm-theme-dark {
     --dm-text-secondary: #ffffff;
     --dm-text-tertiary: #cccccc;
     --dm-hairline: rgba(255, 255, 255, 0.45);
     --dm-hairline-strong: rgba(255, 255, 255, 0.65);
     --dm-hover: #1f1f1f;
-    --dm-shadow-sm: none;
-    --dm-shadow-md: none;
-    --dm-shadow-lg: none;
   }
 }
