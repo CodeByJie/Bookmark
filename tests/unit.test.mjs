@@ -10,7 +10,7 @@
 //   3. bookmarks-cache   — 缓存命中 / 并发去重 / invalidate / 失败重试
 //   4. injector↔protocol — classic script 内联镜像的 action 集合
 //                          必须与 shared/protocol.js 保持同步（文档化契约）
-//   5. bookmark-ops      — 删除快照 / 恢复兜底（mock chrome.bookmarks）
+//   5. bookmark-ops      — 删除守卫：get 失败/节点残缺均不执行 remove
 // ============================================================
 
 import assert from "node:assert/strict";
@@ -158,7 +158,7 @@ test("injector 内联的 action 集合与 protocol.js 同步", async () => {
 });
 
 // ============================================================
-// 5. bookmark-ops：快照 / 删除守卫 / 恢复兜底
+// 5. bookmark-ops：删除守卫（快照失败不执行删除）
 //    扩展页面场景：chrome.bookmarks 可用。用例结束后必须还原
 //    （delete globalThis.chrome.bookmarks），否则会污染第 3 组
 //    缓存用例的"content script 走 SW 代理"分支。
@@ -170,28 +170,7 @@ const withoutBookmarks = () => {
   delete globalThis.chrome.bookmarks;
 };
 
-test("toSnapshot：数组解包、字段守卫、index 兜底", async () => {
-  const ops = await load("data/bookmark-ops.js");
-  const node = { id: "5", title: "GitHub", url: "https://github.com", parentId: "2", index: 3 };
-  assert.deepEqual(ops.toSnapshot([node]), node);
-  assert.equal(ops.toSnapshot(null), null);
-  assert.equal(ops.toSnapshot([{ title: "no url" }]), null, "缺 url 不可恢复");
-  assert.equal(ops.toSnapshot([{ url: "https://a.b" }]), null, "缺 parentId 不可恢复");
-  const noIndex = ops.toSnapshot({ id: "1", url: "https://a.b", parentId: "2" });
-  assert.equal(noIndex.index, 0, "缺 index 兜底为 0");
-  assert.equal(noIndex.title, "", "缺 title 兜底为空串");
-});
-
-test("createArgsSequence：先原位后书签栏首位", async () => {
-  const ops = await load("data/bookmark-ops.js");
-  const snap = { id: "5", title: "t", url: "u", parentId: "9", index: 3 };
-  assert.deepEqual(ops.createArgsSequence(snap), [
-    { parentId: "9", index: 3, title: "t", url: "u" },
-    { parentId: "1", index: 0, title: "t", url: "u" },
-  ]);
-});
-
-test("removeBookmark：快照失败不执行删除", async () => {
+test("removeBookmark：get 失败不执行删除，返回 false", async () => {
   const ops = await load("data/bookmark-ops.js");
   let removed = false;
   withBookmarksMock({
@@ -201,47 +180,36 @@ test("removeBookmark：快照失败不执行删除", async () => {
     remove: async () => {
       removed = true;
     },
-    create: async () => ({}),
   });
-  assert.equal(await ops.removeBookmark("ghost"), null);
-  assert.equal(removed, false, "取不到快照绝不能调 remove");
+  assert.equal(await ops.removeBookmark("ghost"), false);
+  assert.equal(removed, false, "取不到节点绝不能调 remove");
   withoutBookmarks();
 });
 
-test("removeBookmark：成功返回快照并删除", async () => {
+test("removeBookmark：字段不全的节点不可删", async () => {
+  const ops = await load("data/bookmark-ops.js");
+  let removed = false;
+  withBookmarksMock({
+    get: async () => [{ id: "5", title: "文件夹？" }], // 无 url/parentId
+    remove: async () => {
+      removed = true;
+    },
+  });
+  assert.equal(await ops.removeBookmark("5"), false);
+  assert.equal(removed, false);
+  withoutBookmarks();
+});
+
+test("removeBookmark：成功删除返回 true", async () => {
   const ops = await load("data/bookmark-ops.js");
   const node = { id: "5", title: "t", url: "u", parentId: "2", index: 1 };
   const removed = [];
   withBookmarksMock({
     get: async () => [node],
     remove: async (id) => removed.push(id),
-    create: async () => ({}),
   });
-  assert.deepEqual(await ops.removeBookmark("5"), node);
+  assert.equal(await ops.removeBookmark("5"), true);
   assert.deepEqual(removed, ["5"]);
-  withoutBookmarks();
-});
-
-test("restoreBookmark：原位失败落书签栏首位", async () => {
-  const ops = await load("data/bookmark-ops.js");
-  const attempts = [];
-  withBookmarksMock({
-    get: async () => [],
-    remove: async () => {},
-    create: async (args) => {
-      attempts.push(args);
-      if (args.parentId !== "1") throw new Error("parent gone");
-    },
-  });
-  const snap = { id: "5", title: "t", url: "u", parentId: "9", index: 3 };
-  assert.deepEqual(await ops.restoreBookmark(snap), { ok: true });
-  assert.deepEqual(attempts.map((a) => a.parentId), ["9", "1"]);
-
-  attempts.length = 0;
-  globalThis.chrome.bookmarks.create = async () => {
-    throw new Error("no where to put it");
-  };
-  assert.deepEqual(await ops.restoreBookmark(snap), { ok: false });
   withoutBookmarks();
 });
 

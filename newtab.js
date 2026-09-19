@@ -8,12 +8,12 @@
 // newtab 页签与浮板面板实时同步。
 //
 // 整理模式（.dm-edit-toggle）：开启后 tile 出现 × 删除钮，
-// 删除带 6 秒撤销（快照仅存内存——页面关闭即永久生效）。
+// 点击立即永久删除（无撤销，Chrome 书签没有回收站）。
 // ============================================================
 
 import { mountSurface } from "./surface/surface.js";
 import { getTheme, setTheme, applyThemeClass, onThemeChange } from "./data/theme.js";
-import { removeBookmark, restoreBookmark } from "./data/bookmark-ops.js";
+import { removeBookmark } from "./data/bookmark-ops.js";
 
 const container = document.getElementById("bookmarks");
 const themeToggle = document.getElementById("theme-toggle");
@@ -63,73 +63,17 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && editing) setEditing(false);
 });
 
-// ---- 删除 + 撤销 toast（body 级单例：list 重渲染会销毁内部节点）----
-const UNDO_MS = 6000;
+// ---- 删除：点击 × 立即永久生效（无撤销）----
+// inFlight 去重：remove 前先 get 快照，异步窗口内同一 tile
+// 可能连点两次——不去重的话第二次只是 get 失败静默无害，
+// 但去重让"一次点击一次删除"的语义更确定。
 const inFlight = new Set();
-let pending = null; // { snap, timer, el }
-
-function commitPending() {
-  if (!pending) return;
-  clearTimeout(pending.timer);
-  pending.el.remove();
-  pending = null;
-}
-
-function showUndoToast(snap) {
-  commitPending(); // 顶掉旧项——旧删除即刻永久化
-
-  const el = document.createElement("div");
-  el.className = "dm-toast";
-  el.setAttribute("role", "status");
-  el.setAttribute("aria-live", "polite");
-
-  const text = document.createElement("span");
-  text.className = "dm-toast-text";
-  text.textContent = `已删除「${snap.title}」`;
-
-  const action = document.createElement("button");
-  action.className = "dm-toast-action";
-  action.type = "button";
-  action.textContent = "撤销";
-  action.addEventListener("click", async () => {
-    const entry = pending;
-    commitPending();
-    const res = await restoreBookmark(entry.snap);
-    if (!res.ok) {
-      surface.load();
-      showExpiredToast();
-    }
-    // 成功路径无需手动 load：bookmarks.onCreated → onChanged 订阅
-    // 会自动失效缓存并重渲染。
-  });
-
-  el.appendChild(text);
-  el.appendChild(action);
-  document.body.appendChild(el);
-
-  const timer = setTimeout(commitPending, UNDO_MS);
-  pending = { snap, timer, el };
-}
-
-function showExpiredToast() {
-  const el = document.createElement("div");
-  el.className = "dm-toast";
-  el.setAttribute("role", "status");
-  el.setAttribute("aria-live", "polite");
-  const text = document.createElement("span");
-  text.className = "dm-toast-text";
-  text.textContent = "书签无法恢复";
-  el.appendChild(text);
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), UNDO_MS);
-}
 
 async function handleRemove(id) {
   if (inFlight.has(id)) return;
   inFlight.add(id);
   try {
-    const snap = await removeBookmark(id);
-    if (snap) showUndoToast(snap);
+    await removeBookmark(id);
   } finally {
     inFlight.delete(id);
   }
